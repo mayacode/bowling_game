@@ -9,8 +9,8 @@ export default class FrameComponent extends React.Component {
     rollAction: React.PropTypes.func,
     nextAction: React.PropTypes.func
   };
-  
-  render() {//console.log('FrameComponent', this.props);
+
+  render() {
     const {
       number, isCompleted, total, rollAction, nextAction, readOnly, isLastFrame, children
     } = this.props;

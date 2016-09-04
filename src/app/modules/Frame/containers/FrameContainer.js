@@ -19,6 +19,7 @@ class FrameContainer extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const props = this.props;
+
     if (!Object.is(props.roll, nextProps.roll)) {
       props.addRollToFrame({ roll: nextProps.roll, conf: nextProps.conf });
       props.updateResultsWithBonus(nextProps.roll);
@@ -71,7 +72,7 @@ class FrameContainer extends React.Component {
     ));
   }
 
-  render() {//console.log('FrameContainer', { ...this.props });
+  render() {
     return (
       <div>
         {this.renderFrames()}

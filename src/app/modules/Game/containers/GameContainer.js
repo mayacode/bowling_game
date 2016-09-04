@@ -21,7 +21,7 @@ class GameContainer extends React.Component {
     return <FrameContainer conf={conf} />;
   };
 
-  render() {// console.log('GameContainer', this.props);
+  render() {
     const { game: { activeGame }, playAction, totalScore } = this.props;
 
     return (

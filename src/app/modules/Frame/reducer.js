@@ -2,6 +2,7 @@ import {
   ADD_ROLL_TO_FRAME, NEXT_FRAME, UPDATE_FRAME_LIST, ADD_FRAME_TO_LIST, COUNT_TOTAL_SCORE,
   UPDATE_RESULTS_WITH_BONUS
 } from './constants';
+import _ from 'lodash';
 
 const initialState = {
   frameNr: 1,
@@ -29,27 +30,38 @@ const isSpecial = (rolls, conf, index) => (
   getRollPoints(rolls) === conf.numberOfPins
 );
 
-const allRollsMadeForSpecial = (frame, conf) => {
-  const res = conf.specialCases.map((name, index) => {
-    if (frame.specialCase[name]) {
-      return frame.results.length ===
-        conf.numberOfFramesForSpecialCase[index] + conf.additionalRollsForSpecialCase[index];
-    }
-  });
-  return res.indexOf(true) > -1;
-};
+const isNextRollPossible = (frame, conf) => {
+  const specialNames = Object.keys(frame.specialCase);
+  let numberOfResults = 0;
+  if (frame.isLastFrame && specialNames.length) {
+    conf.specialCases.map((name, index) => {
+      if (specialNames.indexOf(name) > -1) {
+        numberOfResults +=
+          conf.numberOfFramesForSpecialCase[index] + conf.additionalRollsForSpecialCase[index];
+      }
+    });
 
-const isNextRollPossible = (frame, conf) => !isSpecial(frame.results, conf, 'strike') &&
+    return frame.results.length < numberOfResults;
+  }
+
+  return !isSpecial(frame.results, conf, 'strike') &&
     !(frame.results.length === conf.minNumberOfRollsPerFrame);
+};
 
 const checkFrameEdgeCases = (frame, conf) => {
   conf.specialCases.every((name, index) => {
     if (isSpecial(frame.results, conf, index)) {
-      frame.specialCase[name] = true;
-      frame.isCompleted = true;
-      frame.toShow = conf.numberOfFramesForSpecialCase[index];
-      for (var i = 0; i < conf.additionalRollsForSpecialCase[index]; i++) {
-        frame.results.push(-1);
+      let specialCase = { ...frame.specialCase };
+      specialCase[name] = true;
+      frame.specialCase = specialCase;
+      frame.isCompleted = frame.isLastFrame ? false : true;
+      frame.rest = conf.numberOfPins;
+      frame.toShow = frame.isLastFrame ?
+        frame.results.length : conf.numberOfFramesForSpecialCase[index];
+      if (!frame.isLastFrame) {
+        for (var i = 0; i < conf.additionalRollsForSpecialCase[index]; i++) {
+          frame.results.push(-1);
+        }
       }
 
       return false;
@@ -58,6 +70,11 @@ const checkFrameEdgeCases = (frame, conf) => {
     return true;
   });
   return frame;
+};
+
+const calculateResults = (frame, rolls, newestRoll) => {
+  rolls.push(newestRoll);
+  return rolls;
 };
 
 export function frame(state = { ...initialState }, action) {
@@ -69,16 +86,12 @@ export function frame(state = { ...initialState }, action) {
       let newState = { ...state };
       const { roll, conf } = action.payload;
       if (isNextRollPossible(newState, conf)) {
-        let results = [...newState.results];
-        results.push(roll.result);
-        newState.results = results;
+        newState.results = calculateResults(newState, [...newState.results], roll.result);
         newState.isCompleted = !isNextRollPossible(newState, conf);
         newState.total = getRollPoints(newState.results);
         newState.rest = conf.numberOfPins - roll.result;
         newState.toShow += 1;
         checkFrameEdgeCases(newState, conf);
-      } else {
-        newState.total = getRollPoints(newState.results);
       }
 
       return newState;

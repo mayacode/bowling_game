@@ -8,7 +8,7 @@ export default class PageContainer extends React.Component {
     playAction: React.PropTypes.func
   };
 
-  render() {// console.log('PageContainer', this.props);
+  render() {
     return (
       <PageComponent>
         <GameContainer conf={gameConf} />

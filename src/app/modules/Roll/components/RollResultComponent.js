@@ -9,7 +9,7 @@ export default class RollResultComponent extends React.Component {
     isSpare: React.PropTypes.bool
   };
 
-  render() {// console.log('RollResultComponent', this.props);
+  render() {
     const { nr, result, specialCase } = this.props;
 
     return (
