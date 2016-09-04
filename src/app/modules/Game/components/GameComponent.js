@@ -1,4 +1,5 @@
 import React from 'react';
+import ButtonComponent from '../../Elements/components/Button';
 
 export default class GameComponent extends React.Component {
   static propTypes = {
@@ -8,8 +9,9 @@ export default class GameComponent extends React.Component {
   render() {
     const { clickAction } = this.props;
 
-    return (
-      <button onClick={clickAction}>Play</button>
-    );
+    return <ButtonComponent
+      clickAction={clickAction}
+      text="Play"
+    />;
   }
 };
