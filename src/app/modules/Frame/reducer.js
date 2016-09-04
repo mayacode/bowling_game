@@ -1,5 +1,6 @@
 import {
-  ADD_ROLL_TO_FRAME, NEXT_FRAME, UPDATE_FRAME_LIST, ADD_FRAME_TO_LIST, COUNT_TOTAL_SCORE
+  ADD_ROLL_TO_FRAME, NEXT_FRAME, UPDATE_FRAME_LIST, ADD_FRAME_TO_LIST, COUNT_TOTAL_SCORE,
+  UPDATE_RESULTS_WITH_BONUS
 } from './constants';
 
 const initialState = {
@@ -9,7 +10,8 @@ const initialState = {
   rest: 0,
   isCompleted: false,
   specialCase: {},
-  isLastFrame: false
+  isLastFrame: false,
+  toShow: 0
 };
 
 const prepareNextFrame = (frameNr, max) => ({
@@ -19,11 +21,11 @@ const prepareNextFrame = (frameNr, max) => ({
 });
 
 const getRollPoints = rolls => rolls.reduce(
-  (previousValue, currentValue) => previousValue + currentValue
+  (previousValue, currentValue) => currentValue > -1 ? previousValue + currentValue : previousValue
 );
 
 const isSpecial = (rolls, conf, index) => (
-  rolls.length === conf.numberOfFramesForSpecialCase[name] &&
+  rolls.length === conf.numberOfFramesForSpecialCase[index] &&
   getRollPoints(rolls) === conf.numberOfPins
 );
 
@@ -41,10 +43,19 @@ const isNextRollPossible = (frame, conf) => !isSpecial(frame.results, conf, 'str
     !(frame.results.length === conf.minNumberOfRollsPerFrame);
 
 const checkFrameEdgeCases = (frame, conf) => {
-  conf.specialCases.map((name, index) => {
+  conf.specialCases.every((name, index) => {
     if (isSpecial(frame.results, conf, index)) {
-      frame.specialCase[name] = conf.numberOfFramesForSpecialCase[index];
+      frame.specialCase[name] = true;
+      frame.isCompleted = true;
+      frame.toShow = conf.numberOfFramesForSpecialCase[index];
+      for (var i = 0; i < conf.additionalRollsForSpecialCase[index]; i++) {
+        frame.results.push(-1);
+      }
+
+      return false;
     }
+
+    return true;
   });
   return frame;
 };
@@ -64,6 +75,8 @@ export function frame(state = { ...initialState }, action) {
         newState.isCompleted = !isNextRollPossible(newState, conf);
         newState.total = getRollPoints(newState.results);
         newState.rest = conf.numberOfPins - roll.result;
+        newState.toShow += 1;
+        checkFrameEdgeCases(newState, conf);
       } else {
         newState.total = getRollPoints(newState.results);
       }
@@ -93,6 +106,19 @@ export function frames(state = [{ ...initialState }], action) {
     case UPDATE_FRAME_LIST:
       return [...updateFrame([...state], action.payload)];
       break;
+    case UPDATE_RESULTS_WITH_BONUS:
+      let newState = [...state];
+      newState.map((frame, index) => {
+        const i = frame.results.indexOf(-1);
+        if (i > 0) {
+          let results = [...frame.results];
+          results[i] = action.payload.result;
+          newState[index].results = results;
+          newState[index].total = frame.total + action.payload.result;
+        }
+      });
+
+      return newState;
     default:
       return state;
   }

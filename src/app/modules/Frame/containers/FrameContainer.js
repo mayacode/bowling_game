@@ -4,9 +4,10 @@ import FrameComponent from '../../Frame/components/FrameComponent';
 import RollResultComponent from '../../Roll/components/RollResultComponent';
 import { makeRollAction } from '../../Roll/actions';
 import {
-  addRollToFrame, nextFrameAction, addFrameToList, updateFrameList, countScore
+  addRollToFrame, nextFrameAction, addFrameToList, updateFrameList, countScore,
+  updateResultsWithBonus
 } from '../actions';
-import _ from 'lodash';
+
 class FrameContainer extends React.Component {
   static propTypes = {
     frame: React.PropTypes.object,
@@ -20,6 +21,7 @@ class FrameContainer extends React.Component {
     const props = this.props;
     if (!Object.is(props.roll, nextProps.roll)) {
       props.addRollToFrame({ roll: nextProps.roll, conf: nextProps.conf });
+      props.updateResultsWithBonus(nextProps.roll);
     }
 
     if (!Object.is(props.frame, nextProps.frame)) {
@@ -49,18 +51,22 @@ class FrameContainer extends React.Component {
         readOnly={frameList[index + 1]}
         isLastFrame={frameObj.isLastFrame}
       >
-        {frameObj.results.map((roll, index) =>
-          <RollResultComponent
-            key={index}
-            nr={index + 1}
-            result={roll}
-            specialCase={conf.specialCases.map((name, index) => {
-              if (frameObj.specialCase[name] === (index + 1)) {
-                return { name };
-              }
-            })[0]}
-          />
-        )}
+        {frameObj.results.map((roll, index) => {
+          if (index < frameObj.toShow) {
+            return (
+              <RollResultComponent
+                key={index}
+                nr={index + 1}
+                result={roll}
+                specialCase={conf.specialCases.map((name, index) => {
+                  if (frameObj.specialCase[name] === (index + 1)) {
+                    return { name };
+                  }
+                })[0]}
+              />
+            );
+          }
+        })}
       </FrameComponent>
     ));
   }
@@ -100,7 +106,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     updateFrameList: frameObj => dispatch(updateFrameList(frameObj)),
     nextFrameAction: () => dispatch(nextFrameAction(conf.numberOfFrames)),
     addFrameToList: () => dispatch(addFrameToList()),
-    countScore: (frameList) => dispatch(countScore(frameList))
+    countScore: frameList => dispatch(countScore(frameList)),
+    updateResultsWithBonus: roll => dispatch(updateResultsWithBonus(roll))
   };
 };
 

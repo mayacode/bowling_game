@@ -1,5 +1,6 @@
 import {
-  NEXT_FRAME, ADD_ROLL_TO_FRAME, ADD_FRAME_TO_LIST, UPDATE_FRAME_LIST, COUNT_TOTAL_SCORE
+  NEXT_FRAME, ADD_ROLL_TO_FRAME, ADD_FRAME_TO_LIST, UPDATE_FRAME_LIST, COUNT_TOTAL_SCORE,
+  UPDATE_RESULTS_WITH_BONUS
 } from './constants';
 
 export const nextFrameAction = (max) => ({
@@ -24,4 +25,9 @@ export const updateFrameList = frameObj => ({
 export const countScore = frameList => ({
   type: COUNT_TOTAL_SCORE,
   payload: frameList
+});
+
+export const updateResultsWithBonus = roll => ({
+  type: UPDATE_RESULTS_WITH_BONUS,
+  payload: roll
 });
