@@ -6,7 +6,7 @@ export default class PageComponent extends React.Component {
     children: React.PropTypes.element.isRequired
   };
 
-  render() {
+  render() {// console.log('PageComponent', this.props);
     const { children } = this.props;
 
     return (

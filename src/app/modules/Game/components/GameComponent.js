@@ -6,7 +6,7 @@ export default class GameComponent extends React.Component {
     clickAction: React.PropTypes.func
   };
 
-  render() {
+  render() {// console.log('GameComponent', this.props);
     const { clickAction } = this.props;
 
     return <ButtonComponent
