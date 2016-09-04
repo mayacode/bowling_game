@@ -1,5 +1,7 @@
 import React from 'react';
 import PageComponent from '../components/PageComponent';
+import GameContainer from '../../Game/containers/GameContainer';
+import gameConf from '../../../config/appConfig';
 
 export default class PageContainer extends React.Component {
   static propTypes = {
@@ -9,7 +11,7 @@ export default class PageContainer extends React.Component {
   render() {
     return (
       <PageComponent>
-        <div>Hello World</div>
+        <GameContainer conf={gameConf} />
       </PageComponent>
     );
   }
